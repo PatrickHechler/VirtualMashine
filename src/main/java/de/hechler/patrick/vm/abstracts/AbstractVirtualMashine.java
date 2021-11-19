@@ -13,7 +13,7 @@ import de.hechler.patrick.vm.interfaces.VirtaulMashine;
 import de.hechler.patrick.zeugs.interfaces.Stack;
 import de.hechler.patrick.zeugs.objects.StackImpl;
 
-public abstract class VirtualMashineAbstract <STACK_ENTRY extends VMStackEntry, BREAKPOINT extends VMBreakpoint, CLASS extends VMClass, METHOD extends VMMethod>
+public abstract class AbstractVirtualMashine <STACK_ENTRY extends VMStackEntry, BREAKPOINT extends VMBreakpoint, CLASS extends VMClass, METHOD extends VMMethod>
 	implements VirtaulMashine {
 	
 	protected final Map <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>> breakpoints;
@@ -25,16 +25,16 @@ public abstract class VirtualMashineAbstract <STACK_ENTRY extends VMStackEntry, 
 	
 	
 	@SuppressWarnings("unchecked")
-	protected VirtualMashineAbstract() {
+	protected AbstractVirtualMashine() {
 		this((Class <STACK_ENTRY>) VMStackEntry.class);
 	}
 	
-	protected VirtualMashineAbstract(Class <STACK_ENTRY> stackCls) {
+	protected AbstractVirtualMashine(Class <STACK_ENTRY> stackCls) {
 		this(new HashMap <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>>(), new StackImpl <>(stackCls), false,
 			true);
 	}
 	
-	protected VirtualMashineAbstract(Map <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>> breakpoints, Stack <STACK_ENTRY> stack, boolean ignoreBreakpoints, boolean runInDiffrentThreats) {
+	protected AbstractVirtualMashine(Map <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>> breakpoints, Stack <STACK_ENTRY> stack, boolean ignoreBreakpoints, boolean runInDiffrentThreats) {
 		this.breakpoints = breakpoints;
 		this.stack = stack;
 		this.ignoreBreakpoints = ignoreBreakpoints;
