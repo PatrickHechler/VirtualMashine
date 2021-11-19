@@ -13,7 +13,7 @@ import de.hechler.patrick.vm.interfaces.VirtaulMashine;
 import de.hechler.patrick.zeugs.interfaces.Stack;
 import de.hechler.patrick.zeugs.objects.StackImpl;
 
-public abstract class AbstractVirtualMashine <STACK_ENTRY extends VMStackEntry, BREAKPOINT extends VMBreakpoint, CLASS extends VMClass, METHOD extends VMMethod>
+public abstract class AbstractVirtualMashine <COMMAND extends VMCommand, STACK_ENTRY extends VMStackEntry <COMMAND>, BREAKPOINT extends VMBreakpoint, CLASS extends VMClass, METHOD extends VMMethod>
 	implements VirtaulMashine {
 	
 	protected final Map <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>> breakpoints;
@@ -148,15 +148,44 @@ public abstract class AbstractVirtualMashine <STACK_ENTRY extends VMStackEntry, 
 	@Override
 	@SuppressWarnings("unchecked")
 	public BREAKPOINT addBreakpoint(VMBreakpoint breakpoint) {
-		Map <METHOD, Map <Integer, BREAKPOINT>> map = this.breakpoints.get(breakpoint.type());
-		Map <Integer, BREAKPOINT> map2 = map.get(breakpoint.method());
+		VMClass type = breakpoint.type();
+		Map <METHOD, Map <Integer, BREAKPOINT>> map;
+		if (this.breakpoints.containsKey(type)) {
+			map = this.breakpoints.get(type);
+		} else {
+			map = new HashMap <>();
+			this.breakpoints.put((CLASS) type, map);
+		}
+		Map <Integer, BREAKPOINT> map2;
+		VMMethod method = breakpoint.method();
+		if (map.containsKey(method)) {
+			map2 = map.get(method);
+		} else {
+			map2 = new HashMap <>();
+			map.put((METHOD) method, map2);
+		}
 		return map2.put(breakpoint.index(), (BREAKPOINT) breakpoint);
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public BREAKPOINT removeBreakpoint(VMBreakpoint breakpoint) {
-		Map <METHOD, Map <Integer, BREAKPOINT>> map = this.breakpoints.get(breakpoint.type());
-		Map <Integer, BREAKPOINT> map2 = map.get(breakpoint.method());
+		VMClass type = breakpoint.type();
+		Map <METHOD, Map <Integer, BREAKPOINT>> map;
+		if (this.breakpoints.containsKey(type)) {
+			map = this.breakpoints.get(type);
+		} else {
+			map = new HashMap <>();
+			this.breakpoints.put((CLASS) type, map);
+		}
+		Map <Integer, BREAKPOINT> map2;
+		VMMethod method = breakpoint.method();
+		if (map.containsKey(method)) {
+			map2 = map.get(method);
+		} else {
+			map2 = new HashMap <>();
+			map.put((METHOD) method, map2);
+		}
 		return map2.remove(breakpoint.index());
 	}
 	
@@ -209,8 +238,8 @@ public abstract class AbstractVirtualMashine <STACK_ENTRY extends VMStackEntry, 
 	}
 	
 	protected void executeNext() {
-		VMStackEntry entry = this.stack.peek();
-		List <VMCommand> cmds = entry.commands();
+		VMStackEntry <? extends VMCommand> entry = this.stack.peek();
+		List <? extends VMCommand> cmds = entry.commands();
 		int ip = entry.instructionPointer();
 		this.execute(cmds.get(ip));
 	}

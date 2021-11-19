@@ -2,10 +2,10 @@ package de.hechler.patrick.vm.interfaces;
 
 import java.util.List;
 
-public interface VMMethodHead {
+public interface VMMethodHead <PARAMETER extends VMParameter> {
 	
 	String name();
 	
-	List<VMParameter> params();
+	List <PARAMETER> params();
 	
 }

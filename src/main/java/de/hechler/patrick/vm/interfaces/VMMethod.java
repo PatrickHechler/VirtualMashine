@@ -2,10 +2,12 @@ package de.hechler.patrick.vm.interfaces;
 
 import java.util.List;
 
-public interface VMMethod {
+public interface VMMethod <COMMAND extends VMCommand, PARAMETER extends VMParameter> {
 	
 	String name();
 	
-	List<VMCommand> commands();
+	List <COMMAND> commands();
+	
+	VMMethodHead <PARAMETER> head();
 	
 }

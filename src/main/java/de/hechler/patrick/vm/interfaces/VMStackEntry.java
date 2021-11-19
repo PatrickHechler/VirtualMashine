@@ -2,10 +2,10 @@ package de.hechler.patrick.vm.interfaces;
 
 import java.util.List;
 
-public interface VMStackEntry {
+public interface VMStackEntry <COMMAND extends VMCommand> {
 	
 	int instructionPointer();
 	
-	List<VMCommand> commands();
+	List <COMMAND> commands();
 	
 }
