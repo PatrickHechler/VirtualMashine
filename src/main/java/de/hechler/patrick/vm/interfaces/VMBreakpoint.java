@@ -1,11 +1,11 @@
 package de.hechler.patrick.vm.interfaces;
 
 
-public interface VMBreakpoint {
+public interface VMBreakpoint<CLASS extends VMClass <?, ?, ?, ?>, METHOD extends VMMethod <?, ?>> {
 	
-	VMClass type();
+	CLASS type();
 	
-	VMMethod method();
+	METHOD method();
 	
 	int index();
 	

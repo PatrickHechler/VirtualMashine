@@ -2,7 +2,7 @@ package de.hechler.patrick.vm.interfaces;
 
 import de.hechler.patrick.zeugs.interfaces.Stack;
 
-public interface VirtaulMashine extends Runnable {
+public interface VirtaulMashine <STACK_ENTRY extends VMStackEntry <?>, BREAKPOINT extends VMBreakpoint <?, ?>, COMMAND extends VMCommand> extends Runnable {
 	
 	@Override
 	void run();
@@ -19,16 +19,16 @@ public interface VirtaulMashine extends Runnable {
 	
 	boolean isRunning();
 	
-	void execute(VMCommand cmd);
+	void execute(COMMAND cmd);
 	
-	Stack<? extends VMStackEntry> getStack();
+	Stack <STACK_ENTRY> getStack();
 	
 	boolean ignoresBreakpoints();
 	
 	void ignoreBreakpoints(boolean ignore);
 	
-	VMBreakpoint addBreakpoint(VMBreakpoint breakpoint);
+	BREAKPOINT addBreakpoint(BREAKPOINT breakpoint);
 	
-	VMBreakpoint removeBreakpoint(VMBreakpoint breakpoint);
+	BREAKPOINT removeBreakpoint(BREAKPOINT breakpoint);
 	
 }

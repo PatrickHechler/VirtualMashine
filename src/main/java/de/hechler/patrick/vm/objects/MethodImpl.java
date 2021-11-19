@@ -8,7 +8,7 @@ import de.hechler.patrick.vm.interfaces.VMMethodHead;
 import de.hechler.patrick.vm.interfaces.VMParameter;
 
 
-public class MethodImpl <COMMAND extends VMCommand, PARAMETER extends VMParameter> extends MethodHeadImpl <PARAMETER> implements VMMethod <COMMAND, PARAMETER> {
+public class MethodImpl <COMMAND extends VMCommand, PARAMETER extends VMParameter<?>> extends MethodHeadImpl <PARAMETER> implements VMMethod <COMMAND, PARAMETER> {
 	
 	private final List <COMMAND> cmds;
 	

@@ -6,16 +6,16 @@ import de.hechler.patrick.vm.interfaces.VMCommand;
 import de.hechler.patrick.vm.interfaces.VMStackEntry;
 
 
-public class StackImpl <COMMAND extends VMCommand> implements VMStackEntry <COMMAND> {
+public class StackEntryImpl <COMMAND extends VMCommand> implements VMStackEntry <COMMAND> {
 	
 	private List <COMMAND> cmds;
 	private int            ip;
 	
-	public StackImpl(List <COMMAND> cmds) {
+	public StackEntryImpl(List <COMMAND> cmds) {
 		this(cmds, 0);
 	}
 	
-	public StackImpl(List <COMMAND> cmds, int ip) {
+	public StackEntryImpl(List <COMMAND> cmds, int ip) {
 		this.cmds = cmds;
 		this.ip = ip;
 	}

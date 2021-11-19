@@ -4,10 +4,10 @@ import de.hechler.patrick.vm.interfaces.VMClass;
 import de.hechler.patrick.vm.interfaces.VMParameter;
 
 
-public class ParameterImpl <CLASS extends VMClass> implements VMParameter {
+public class ParameterImpl <CLASS extends VMClass <?, ?, ?, ?>> implements VMParameter <CLASS> {
 	
 	public final CLASS type;
-	private String name;
+	private String     name;
 	
 	public ParameterImpl(CLASS type) {
 		this(type, null);

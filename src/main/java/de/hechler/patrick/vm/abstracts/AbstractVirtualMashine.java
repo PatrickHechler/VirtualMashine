@@ -8,13 +8,15 @@ import de.hechler.patrick.vm.interfaces.VMBreakpoint;
 import de.hechler.patrick.vm.interfaces.VMClass;
 import de.hechler.patrick.vm.interfaces.VMCommand;
 import de.hechler.patrick.vm.interfaces.VMMethod;
+import de.hechler.patrick.vm.interfaces.VMParameter;
 import de.hechler.patrick.vm.interfaces.VMStackEntry;
 import de.hechler.patrick.vm.interfaces.VirtaulMashine;
 import de.hechler.patrick.zeugs.interfaces.Stack;
 import de.hechler.patrick.zeugs.objects.StackImpl;
 
-public abstract class AbstractVirtualMashine <COMMAND extends VMCommand, STACK_ENTRY extends VMStackEntry <COMMAND>, BREAKPOINT extends VMBreakpoint, CLASS extends VMClass, METHOD extends VMMethod>
-	implements VirtaulMashine {
+public abstract class AbstractVirtualMashine <COMMAND extends VMCommand, STACK_ENTRY extends VMStackEntry <COMMAND>, CLASS extends VMClass <?, ?, ?, ?>, PARAMETER extends VMParameter <CLASS>,
+	METHOD extends VMMethod <COMMAND, PARAMETER>, BREAKPOINT extends VMBreakpoint <CLASS, METHOD>>
+	implements VirtaulMashine <STACK_ENTRY, BREAKPOINT, COMMAND> {
 	
 	protected final Map <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>> breakpoints;
 	protected final Stack <STACK_ENTRY>                                  stack;
@@ -30,8 +32,20 @@ public abstract class AbstractVirtualMashine <COMMAND extends VMCommand, STACK_E
 	}
 	
 	protected AbstractVirtualMashine(Class <STACK_ENTRY> stackCls) {
-		this(new HashMap <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>>(), new StackImpl <>(stackCls), false,
-			true);
+		this(new HashMap <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>>(), new StackImpl <>(stackCls), false, true);
+	}
+	
+	protected AbstractVirtualMashine(Map <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>> breakpoints, Stack <STACK_ENTRY> stack) {
+		this(new HashMap <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>>(), stack, false, true);
+	}
+	
+	protected AbstractVirtualMashine(Class<STACK_ENTRY> stackcls, boolean ignoreBreakpoints, boolean runInDiffrentThreats) {
+		this(new HashMap <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>>(), new StackImpl <>(stackcls), ignoreBreakpoints, runInDiffrentThreats);
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected AbstractVirtualMashine(boolean ignoreBreakpoints, boolean runInDiffrentThreats) {
+		this(new HashMap <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>>(), (Stack <STACK_ENTRY>) new StackImpl <>(VMStackEntry.class), ignoreBreakpoints, runInDiffrentThreats);
 	}
 	
 	protected AbstractVirtualMashine(Map <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>> breakpoints, Stack <STACK_ENTRY> stack, boolean ignoreBreakpoints, boolean runInDiffrentThreats) {
@@ -147,8 +161,8 @@ public abstract class AbstractVirtualMashine <COMMAND extends VMCommand, STACK_E
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public BREAKPOINT addBreakpoint(VMBreakpoint breakpoint) {
-		VMClass type = breakpoint.type();
+	public BREAKPOINT addBreakpoint(BREAKPOINT breakpoint) {
+		VMClass <?, ?, ?, ?> type = breakpoint.type();
 		Map <METHOD, Map <Integer, BREAKPOINT>> map;
 		if (this.breakpoints.containsKey(type)) {
 			map = this.breakpoints.get(type);
@@ -157,7 +171,7 @@ public abstract class AbstractVirtualMashine <COMMAND extends VMCommand, STACK_E
 			this.breakpoints.put((CLASS) type, map);
 		}
 		Map <Integer, BREAKPOINT> map2;
-		VMMethod method = breakpoint.method();
+		VMMethod <?, ?> method = breakpoint.method();
 		if (map.containsKey(method)) {
 			map2 = map.get(method);
 		} else {
@@ -169,8 +183,8 @@ public abstract class AbstractVirtualMashine <COMMAND extends VMCommand, STACK_E
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public BREAKPOINT removeBreakpoint(VMBreakpoint breakpoint) {
-		VMClass type = breakpoint.type();
+	public BREAKPOINT removeBreakpoint(BREAKPOINT breakpoint) {
+		VMClass <?, ?, ?, ?> type = breakpoint.type();
 		Map <METHOD, Map <Integer, BREAKPOINT>> map;
 		if (this.breakpoints.containsKey(type)) {
 			map = this.breakpoints.get(type);
@@ -179,7 +193,7 @@ public abstract class AbstractVirtualMashine <COMMAND extends VMCommand, STACK_E
 			this.breakpoints.put((CLASS) type, map);
 		}
 		Map <Integer, BREAKPOINT> map2;
-		VMMethod method = breakpoint.method();
+		VMMethod <?, ?> method = breakpoint.method();
 		if (map.containsKey(method)) {
 			map2 = map.get(method);
 		} else {
@@ -191,38 +205,42 @@ public abstract class AbstractVirtualMashine <COMMAND extends VMCommand, STACK_E
 	
 	protected void run0() {
 		int stacksize = -1;
-		VMState lastState = null;
 		while (true) {
-			VMState newState = this.state;
-			if (lastState != newState) {
-				stacksize = -1;
-			}
-			switch (newState) {
+			switch (this.state) {
 			case running:
 				while (this.state == VMState.running) {
 					executeNext();
 				}
 				break;
 			case stepOut:
-				if (VMState.stepOut != lastState) {
-					stacksize = this.stack.size();
-				}
-				executeNext();
-				if (this.stack.size() < stacksize) {
-					this.state = VMState.suspended;
-					return;
-				}
+				stacksize = this.stack.size();
+				do {
+					executeNext();
+					if (this.stack.size() < stacksize) {
+						this.state = VMState.suspended;
+						return;
+					}
+				} while (this.state == VMState.stepOut);
 				break;
 			case stepOver:
 				stacksize = this.stack.size();
 				executeNext();
-				while (this.stack.size() > stacksize && this.state == VMState.stepOver) {
+				while (this.stack.size() > stacksize) {
+					if (this.state != VMState.stepOver) {
+						break;
+					}
 					executeNext();
+				}
+				if (this.state != VMState.stepOver) {
+					break;
 				}
 				this.state = VMState.suspended;
 				return;
 			case step:
 				executeNext();
+				if (this.state != VMState.step) {
+					break;
+				}
 				this.state = VMState.suspended;
 				return;
 			case suspending:
@@ -233,13 +251,12 @@ public abstract class AbstractVirtualMashine <COMMAND extends VMCommand, STACK_E
 			default:
 				throw new InternalError("unknown state: " + this.state.name());
 			}
-			lastState = newState;
 		}
 	}
 	
 	protected void executeNext() {
-		VMStackEntry <? extends VMCommand> entry = this.stack.peek();
-		List <? extends VMCommand> cmds = entry.commands();
+		VMStackEntry <COMMAND> entry = this.stack.peek();
+		List <COMMAND> cmds = entry.commands();
 		int ip = entry.instructionPointer();
 		this.execute(cmds.get(ip));
 	}

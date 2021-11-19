@@ -1,7 +1,7 @@
 package de.hechler.patrick.vm.interfaces;
 
 
-public interface VMParameter <CLASS extends VMClass <?, ?, ?, ?>> {
+public interface VMVariable <VARIABLE_HEAD, CLASS extends VMClass <?, ?, ?, ?>> {
 	
 	CLASS type();
 	

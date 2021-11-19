@@ -6,7 +6,7 @@ import java.util.List;
 import de.hechler.patrick.vm.interfaces.VMMethodHead;
 import de.hechler.patrick.vm.interfaces.VMParameter;
 
-public class MethodHeadImpl <PARAMETER extends VMParameter> implements VMMethodHead <PARAMETER> {
+public class MethodHeadImpl <PARAMETER extends VMParameter<?>> implements VMMethodHead <PARAMETER> {
 	
 	public final String           name;
 	public final List <PARAMETER> params;
