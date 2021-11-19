@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface VMStackEntry {
 	
-	int instpointer();
+	int instructionPointer();
 	
 	List<VMCommand> commands();
 	
