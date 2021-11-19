@@ -28,7 +28,7 @@ public abstract class AbstractVirtualMashine <COMMAND extends VMCommand, STACK_E
 	
 	@SuppressWarnings("unchecked")
 	protected AbstractVirtualMashine() {
-		this((Class <STACK_ENTRY>) VMStackEntry.class);
+		this((Class <STACK_ENTRY>) (Class <? extends VMStackEntry <?>>) VMStackEntry.class);
 	}
 	
 	protected AbstractVirtualMashine(Class <STACK_ENTRY> stackCls) {
@@ -39,13 +39,14 @@ public abstract class AbstractVirtualMashine <COMMAND extends VMCommand, STACK_E
 		this(new HashMap <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>>(), stack, false, true);
 	}
 	
-	protected AbstractVirtualMashine(Class<STACK_ENTRY> stackcls, boolean ignoreBreakpoints, boolean runInDiffrentThreats) {
+	protected AbstractVirtualMashine(Class <STACK_ENTRY> stackcls, boolean ignoreBreakpoints, boolean runInDiffrentThreats) {
 		this(new HashMap <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>>(), new StackImpl <>(stackcls), ignoreBreakpoints, runInDiffrentThreats);
 	}
 	
 	@SuppressWarnings("unchecked")
 	protected AbstractVirtualMashine(boolean ignoreBreakpoints, boolean runInDiffrentThreats) {
-		this(new HashMap <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>>(), (Stack <STACK_ENTRY>) new StackImpl <>(VMStackEntry.class), ignoreBreakpoints, runInDiffrentThreats);
+		this(new HashMap <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>>(), (Stack <STACK_ENTRY>) (Stack <? extends VMStackEntry <?>>) new StackImpl <>(VMStackEntry.class), ignoreBreakpoints,
+			runInDiffrentThreats);
 	}
 	
 	protected AbstractVirtualMashine(Map <CLASS, Map <METHOD, Map <Integer, BREAKPOINT>>> breakpoints, Stack <STACK_ENTRY> stack, boolean ignoreBreakpoints, boolean runInDiffrentThreats) {
