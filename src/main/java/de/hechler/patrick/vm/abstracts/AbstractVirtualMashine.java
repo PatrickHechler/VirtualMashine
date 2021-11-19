@@ -211,7 +211,7 @@ public abstract class AbstractVirtualMashine <STACK_ENTRY extends VMStackEntry, 
 	protected void executeNext() {
 		VMStackEntry entry = this.stack.peek();
 		List <VMCommand> cmds = entry.commands();
-		int ip = entry.instpointer();
+		int ip = entry.instructionPointer();
 		this.execute(cmds.get(ip));
 	}
 	
